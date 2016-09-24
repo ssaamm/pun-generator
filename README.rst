@@ -7,8 +7,8 @@ your bad puns? Need a new Instagram handle? We've got just the thing for you!
 
 Type in a word and see what puns you get!
 
-Running it
-----------
+Running it locally
+------------------
 
 .. code:: bash
 
@@ -16,9 +16,18 @@ Running it
     . env/bin/activate
     pip3 install -r requirements.txt
 
+    cd src
     mkdir data
     cd util
     python build_db.py
 
-    cd ..
+    cd ../src
     python app.py
+
+Running it with Docker
+----------------------
+
+.. code:: bash
+
+    docker build -t ssaamm/pun-generator .
+    docker run -p 80:5000 -tid ssaamm/pun-generator
