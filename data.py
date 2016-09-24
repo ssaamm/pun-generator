@@ -1,7 +1,5 @@
-import logging
-import os
 from itertools import count
-from urllib.request import urlretrieve
+from urllib.request import urlopen
 
 import requests
 from bs4 import BeautifulSoup
@@ -58,22 +56,20 @@ def get_all_idioms():
         yield from get_idioms_lefg(r.text)
 
 
-def write_idioms(filepath):
-    with open(filepath, 'w') as f:
-        f.writelines(i + '\n' for i in get_all_idioms())
+def get_pronounciations() -> dict:
+    pronounciations = {}
 
+    with urlopen('http://svn.code.sf.net/p/cmusphinx/code/trunk/cmudict/cmudict-0.7b') as f:
+        for unencoded_line in f:
+            line = unencoded_line.decode('latin-1')
+            if line.startswith(';;;'):
+                continue
 
-def write_cmudict(filepath):
-    urlretrieve('http://svn.code.sf.net/p/cmusphinx/code/trunk/cmudict/cmudict-0.7b', filepath)
+            split = line.replace('0', '').replace('1', '').replace('2', '').strip().split()
 
+            pronounciations[split[0]] = split[1:]
 
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
+    return pronounciations
 
-    for filepath, get_file in [('../data/idioms', write_idioms),
-                               ('../data/cmudict', write_cmudict)]:
-        if not os.path.exists(filepath):
-            logging.info('Getting %s', filepath)
-            get_file(filepath)
-        else:
-            logging.info('Already exists %s', filepath)
+pronounciations = get_pronounciations()
+idioms = list(get_all_idioms())

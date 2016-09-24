@@ -1,21 +1,10 @@
-from flask import Flask, jsonify, request, render_template
-from itertools import islice
-from functools import lru_cache
 import logging
+from functools import lru_cache
+from itertools import islice
 
-def get_pronounciations() -> dict:
-    pronounciations = {}
+from flask import Flask, jsonify, request, render_template
 
-    with open('data/cmudict', 'r', encoding='latin-1') as f:
-        for line in f:
-            if line.startswith(';;;'):
-                continue
-
-            split = line.replace('0', '').replace('1', '').replace('2', '').strip().split()
-
-            pronounciations[split[0]] = split[1:]
-
-    return pronounciations
+from data import idioms, pronounciations
 
 
 def word_to_phonemes(word):
@@ -52,14 +41,8 @@ ch.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 ch.setFormatter(formatter)
 logger.addHandler(ch)
+
 app = Flask(__name__)
-
-logger.info('Loading phoneme data')
-pronounciations = get_pronounciations()
-
-logger.info('Loading idioms data')
-with open('data/idioms', 'r') as f:
-    idioms = [L.strip() for L in f]
 
 
 @app.route('/')
