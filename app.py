@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request, render_template
 from itertools import islice
+from functools import lru_cache
 import logging
 
 def get_pronounciations() -> dict:
@@ -45,6 +46,12 @@ def replace_word(sentence, ndx, replacement):
     return ' '.join(split)
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+logger.addHandler(ch)
 app = Flask(__name__)
 
 logger.info('Loading phoneme data')
@@ -57,6 +64,9 @@ with open('data/idioms', 'r') as f:
 
 @app.route('/')
 def index():
+    if 'stats' in request.args:
+        logger.info(get_puns.cache_info())
+
     return render_template('index.html')
 
 
@@ -67,6 +77,7 @@ def pun():
     return jsonify({'puns': puns})
 
 
+@lru_cache()
 def get_puns(input_string, limit=10):
     target = word_to_phonemes(input_string)
     if target is None:
