@@ -8,7 +8,7 @@ RUN apt-get install -y supervisor
 
 ADD src/ /app
 
-RUN /bin/bash -c 'cd /app/util/; python3 build_db.py'
+RUN /bin/bash -c 'mkdir -p /app/data; cd /app/util/; python3 build_db.py'
 
 ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
