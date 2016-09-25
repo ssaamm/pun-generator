@@ -106,7 +106,7 @@ def get_puns(input_string, limit=10):
                              for ndx, word_phoneme in enumerate(word_phonemes)
                              if word_phoneme is not None)
 
-    return [pun for score, pun in islice(sorted(scored_idioms), limit)]
+    return [pun for score, pun in islice(sorted(scored_idioms, key=lambda t: t[0]), limit)]
 
 if __name__ == '__main__':
     app.run(debug=True)
