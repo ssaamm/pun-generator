@@ -26,18 +26,31 @@ def word_to_phonemes(word):
         return None
 
 
-def lev_dist(a, b):
-    return _lev_dist(a, b, len(a), len(b))
+def lev_dist(s, t):
+    """ from Wikipedia https://en.wikipedia.org/wiki/Levenshtein_distance#Iterative_with_two_matrix_rows """
+    if s == t:
+        return 0
+    if len(s) == 0:
+        return len(t)
+    if len(t) == 0:
+        return len(s)
 
+    v0 = list(range(len(t) + 1))
+    v1 = [None for _ in range(len(t) + 1)]
 
-def _lev_dist(a, b, i, j):
-    """ Levenshtein distance equation taken from Wikipedia https://en.wikipedia.org/wiki/Levenshtein_distance """
-    if min(i, j) == 0:
-        return max(i, j)
+    for i in range(len(s)):
+        v1[0] = i + 1
 
-    return min(_lev_dist(a, b, i - 1, j) + 1,
-               _lev_dist(a, b, i, j - 1) + 1,
-               _lev_dist(a, b, i - 1, j - 1) + (0 if a[i - 1] == b[j - 1] else 1))
+        for j in range(len(t)):
+            cost = 0 if s[i] == t[j] else 1
+            v1[j + 1] = min(v1[j] + 1,
+                            v0[j + 1] + 1,
+                            v0[j] + cost)
+
+        for j in range(len(v0)):
+            v0[j] = v1[j]
+
+    return v1[len(t)]
 
 
 def replace_word(sentence, ndx, replacement):
