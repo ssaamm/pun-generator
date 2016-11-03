@@ -1,3 +1,13 @@
+#BEN CODY:
+#I made some git mistakes that I want to clear up with Sam in the morning. but
+#while I'm thinking about it I want to outline my plan.
+#1. I downloaded a pronunciation distance matrix, generated using cmudict and I
+#   put it in the 'data' folder. 
+#2. I plan to use the distance between phonemes in the levenstein distance
+#   calculations. This will make a high score better than a low score.
+#3. I plan to use the weights given in cmudict to modify the phoneme distance
+#   score used in the levenstein calculations
+
 from flask import Flask, jsonify, request, render_template
 from itertools import islice
 from functools import lru_cache
