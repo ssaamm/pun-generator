@@ -21,12 +21,34 @@ def get_pronounciations() -> dict:
             if line.startswith(';;;'):
                 continue
 
-            split = line.replace('0', '').replace('1', '').replace('2', '').strip().split()
-
-            pronounciations[split[0]] = split[1:]
+            split = line.strip().split()
+            
+            sounds = []
+            for sound in split[1:]:
+                sounds.append([sound[:2], sound[2:]])
+            pronounciations[split[0]] = sounds
 
     return pronounciations
 
+def get_phoneme_distances () -> dict:
+    distances = {}
+    distance_matrix = []
+    with open ('data/wpsm', 'r') as f:
+        for line in f:
+            if line.startswith('#'):
+                print ('SKIPPING ' +  line)
+                continue
+            split = line.strip().split()
+            distance_matrix.append(split)
+    phonemes = distance_matrix[0]
+    del distance_matrix[0]
+    for phoneme in phonemes:
+        distances[phoneme] = {}
+        for row in distance_matrix:
+            for distance in row[1:]:
+                distances[phoneme][row[0]] = float(distance)
+    return distances
+            
 
 def word_to_phonemes(word):
     key = ''.join(c for c in word.upper() if c in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')
@@ -36,26 +58,33 @@ def word_to_phonemes(word):
         return None
 
 
-def lev_dist(s, t):
+def lev_dist(s, t, d):
     """ from Wikipedia https://en.wikipedia.org/wiki/Levenshtein_distance#Iterative_with_two_matrix_rows """
     if s == t:
         return 0
+    PENALTY = -2
+
     if len(s) == 0:
-        return len(t)
+        return PENALTY*(len(t))
     if len(t) == 0:
-        return len(s)
+        return PENALTY*(len(s))
 
     v0 = list(range(len(t) + 1))
+    for v in v0:
+        v *= PENALTY
     v1 = [None for _ in range(len(t) + 1)]
-
+    
+    
     for i in range(len(s)):
-        v1[0] = i + 1
+        v1[0] = -i + PENALTY
 
         for j in range(len(t)):
-            cost = 0 if s[i] == t[j] else 1
-            v1[j + 1] = min(v1[j] + 1,
-                            v0[j + 1] + 1,
-                            v0[j] + cost)
+            score = d[s[i][0]][t[j][0]]
+            #if len(s[i][1]) > 0 and len(t[j][1]) > 0:
+               # score *= (1.1 + abs(int(s[i][1])-int(t[j][1]))*.3)
+            v1[j + 1] = max(v1[j] + PENALTY,
+                            v0[j + 1] + PENALTY,
+                            v0[j] + score)
 
         for j in range(len(v0)):
             v0[j] = v1[j]
@@ -106,13 +135,14 @@ def get_puns(input_string, limit=10):
     if target is None:
         return []
 
+    d = get_phoneme_distances
     scored_idioms = []
 
     for idiom in idioms:
         words = idiom.split()
         word_phonemes = [word_to_phonemes(w) for w in words]
 
-        scored_idioms.extend((lev_dist(target, word_phoneme) / len(word_phoneme), replace_word(idiom, ndx, input_string))
+        scored_idioms.extend((lev_dist(target, word_phoneme, d) / len(word_phoneme), replace_word(idiom, ndx, input_string))
                              for ndx, word_phoneme in enumerate(word_phonemes)
                              if word_phoneme is not None)
 

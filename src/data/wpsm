@@ -1,8 +1,8 @@
-   #PRONUNCIATION MATRIX
-   #CITED FROM: 
-   #Ben Hixon, Eric Schneider, Susan L. Epstein, “ Phonemic Similarity
-   #Metrics to Compare Pronunciation Methods”, INTERSPEECH 2011,
-   #28-31 August 2011, Florence, Italy. 
+#PRONUNCIATION MATRIX
+#CITED FROM: 
+#Ben Hixon, Eric Schneider, Susan L. Epstein, “ Phonemic Similarity
+#Metrics to Compare Pronunciation Methods”, INTERSPEECH 2011,
+#28-31 August 2011, Florence, Italy. 
     AA     AE     AH     AO     AW     AY     B      CH     D      DH     EH     ER     EY     F      G      HH     IH     IY     JH     K      L      M      N      NG     OW     OY     P      R      S      SH     T      TH     UH     UW     V      W      Y      Z      ZH     
 AA 2.932 1.685 0.937 2.031 1.556 0.558 -0.030 0.230 0.371 -0.745 0.410 0.833 1.070 0.324 0.791 0.781 0.355 0.964 0.837 0.460 0.069 0.636 0.789 0.307 1.712 0.433 0.012 0.290 0.503 0.473 0.529 1.158 0.824 0.643 0.037 0.380 0.970 0.878 1.212
 AE 1.685 2.964 0.844 0.545 -0.942 0.762 0.167 0.452 0.506 0.764 0.598 0.386 1.269 -0.486 -0.132 0.298 0.245 0.717 0.076 0.157 0.057 0.117 0.439 0.207 0.603 -0.360 -0.568 0.180 0.143 0.328 0.198 0.237 -0.454 -0.506 0.569 -0.064 0.327 0.594 0.642
