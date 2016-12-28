@@ -18,8 +18,7 @@ for k in test_words.keys():
 
 print("DISTANCES:\n")
 
-#Yes, I know this is doing each distance twice. I'm testing to make sure
-#   the distances are symmetrical. I'm about 80% they're supposed to be.
+#deliberately repeating each distance to check for symmetry
 for k in test_words.keys():
     print(k + ":")
     for w in test_words.keys():
