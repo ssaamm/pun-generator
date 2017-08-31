@@ -1,7 +1,18 @@
+#BEN CODY:
+#I made some git mistakes that I want to clear up with Sam in the morning. but
+#while I'm thinking about it I want to outline my plan.
+#1. I downloaded a pronunciation distance matrix, generated using cmudict and I
+#   put it in the 'data' folder. 
+#2. I plan to use the distance between phonemes in the levenstein distance
+#   calculations. This will make a high score better than a low score.
+#3. I plan to use the weights given in cmudict to modify the phoneme distance
+#   score used in the levenstein calculations
+
 from flask import Flask, jsonify, request, render_template
 from itertools import islice
 from functools import lru_cache
 import logging
+import sys
 
 def get_pronounciations() -> dict:
     pronounciations = {}
@@ -11,12 +22,31 @@ def get_pronounciations() -> dict:
             if line.startswith(';;;'):
                 continue
 
-            split = line.replace('0', '').replace('1', '').replace('2', '').strip().split()
-
-            pronounciations[split[0]] = split[1:]
+            split = line.strip().split()
+            
+            sounds = []
+            for sound in split[1:]:
+                sounds.append([sound[:2], sound[2:]])
+            pronounciations[split[0]] = sounds
 
     return pronounciations
 
+def get_phoneme_distances () -> dict:
+    distances = {}
+    distance_matrix = []
+    with open ('data/wpsm', 'r') as f:
+        for line in f:
+            if line.startswith('#'):
+                continue
+            split = line.strip().split()
+            distance_matrix.append(split)
+    phonemes = distance_matrix[0]
+    for i in range(1, len(phonemes)+1):
+        distances[phonemes[i-1]] = {}
+        for j in range(1, len(phonemes)+1):
+            distances[phonemes[i-1]][phonemes[j-1]] = float(distance_matrix[i][j])
+    return distances
+            
 
 def word_to_phonemes(word):
     key = ''.join(c for c in word.upper() if c in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')
@@ -26,31 +56,40 @@ def word_to_phonemes(word):
         return None
 
 
-def lev_dist(s, t):
+def alignment_score(s, t, d):
     """ from Wikipedia https://en.wikipedia.org/wiki/Levenshtein_distance#Iterative_with_two_matrix_rows """
     if s == t:
         return 0
+
+    PENALTY = -3
     if len(s) == 0:
-        return len(t)
+        return PENALTY*(len(t))
     if len(t) == 0:
-        return len(s)
+        return PENALTY*(len(s))
 
-    v0 = list(range(len(t) + 1))
-    v1 = [None for _ in range(len(t) + 1)]
-
-    for i in range(len(s)):
-        v1[0] = i + 1
-
-        for j in range(len(t)):
-            cost = 0 if s[i] == t[j] else 1
-            v1[j + 1] = min(v1[j] + 1,
-                            v0[j + 1] + 1,
-                            v0[j] + cost)
-
-        for j in range(len(v0)):
-            v0[j] = v1[j]
-
-    return v1[len(t)]
+    matrix = list(list(0 for j in range(len(t)+1)) for i in range(len(s)+1))
+      
+    
+    for i in range(len(s)+1):
+        matrix[i][0] = i*PENALTY
+    for j in range(len(t)+1):
+        matrix[0][j] = j*PENALTY
+    for i in range(1, len(s)+1):
+        for j in range(1, len(t)+1):
+            score = d[s[i-1][0]][t[j-1][0]]
+            print("SCORE FOR " + s[i-1][0] + ":" + t[j-1][0]+ " = " +str(score))
+            if len(s[i-1][1]) > 0 and len(t[j-1][1]) > 0:
+                 score *= (1.1 + abs((2-int(s[i-1][1])-int(t[j-1][1])))*.3)
+            matrix[i][j] = max(matrix[i-1][j] + PENALTY,
+                            matrix[i][j-1] + PENALTY,
+                            matrix[i-1][j-1] + score)
+           # sys.stdout.write(str("{0:.2f}".format(matrix[i][j])) + "\t")
+        #print("")
+    for i in range(len(matrix)):
+        for j in range(len(matrix[i])):
+            sys.stdout.write(str("{0:.2f}".format(matrix[i][j])) + "\t")
+        print("")
+    return matrix[len(s)][len(t)]
 
 
 def replace_word(sentence, ndx, replacement):
@@ -96,17 +135,18 @@ def get_puns(input_string, limit=10):
     if target is None:
         return []
 
+    d = get_phoneme_distances()
     scored_idioms = []
 
     for idiom in idioms:
         words = idiom.split()
         word_phonemes = [word_to_phonemes(w) for w in words]
 
-        scored_idioms.extend((lev_dist(target, word_phoneme) / len(word_phoneme), replace_word(idiom, ndx, input_string))
+        scored_idioms.extend((alignment_score(target, word_phoneme, d) / len(word_phoneme), replace_word(idiom, ndx, input_string))
                              for ndx, word_phoneme in enumerate(word_phonemes)
                              if word_phoneme is not None)
 
-    return [pun for score, pun in islice(sorted(scored_idioms, key=lambda t: t[0]), limit)]
+    return [pun for score, pun in islice(sorted(scored_idioms, key=lambda t:t[0], reverse=True), limit)]
 
 if __name__ == '__main__':
     app.run(debug=True)
