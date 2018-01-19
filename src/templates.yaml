@@ -1,0 +1,3 @@
+welcome: Hi there, what word do you want a pun for?
+pun_found: Here's a few puns for {{ word }}. {{ puns|join(', ') }}
+sorry: Sorry, I can't find a pun for {{ word }}

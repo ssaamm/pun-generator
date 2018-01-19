@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request, render_template
+import flask_ask as fa
 from functools import lru_cache
 import logging
 
@@ -67,6 +68,7 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 app = Flask(__name__)
+ask = fa.Ask(app, '/alexa')
 
 logger.info('Loading phoneme data')
 pronounciations = get_pronounciations()
@@ -109,6 +111,22 @@ def get_puns(input_string, limit=10):
 
     scored_idioms.sort(key=lambda score_pun: score_pun[0])
     return [pun for score, pun in scored_idioms if pun is not None][:limit]
+
+
+@ask.launch
+def new_pun():
+    welcome = render_template('welcome')
+    return fa.question(welcome)
+
+
+@ask.intent('PunIntent')
+def get_pun(word):
+    puns = get_puns(word, limit=3)
+    try:
+        return fa.statement(render_template('pun_found', puns=puns, word=word))
+    except IndexError:
+        return fa.statement(render_template('sorry', word=word))
+
 
 if __name__ == '__main__':
     app.run(debug=True)
