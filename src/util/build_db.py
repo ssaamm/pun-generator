@@ -22,18 +22,20 @@ def get_idioms_idiomsphrases(html):
         yield next(i.children).text
 
 
-bad_vals = [':', '(command)', '(n.)', '(v.)', '(v. and n.)', '(adj.)', '(adj)', '(adj/adv)', '(adv.)', '(noun or adjective)']
+bad_vals = [':', '(command)', '(n.)', '(v.)', '(v. and n.)', '(adj.)', '(adj)', '(adj/adv)', '(adv.)', '(noun)',
+            '(noun or adjective)']
+bad_lefg_texts = ['american idioms', 'not allowed', 'our other websites']
 
 
 def get_idioms_lefg(html):
     soup = BeautifulSoup(html, 'html.parser')
-    elements = soup.select('.blue')
+    elements = soup.select('strong')
 
     for i in elements:
-        idioms = i.text.split(';')
-        for idiom_text in idioms:
-            idiom = replace_all(idiom_text.strip(), values=bad_vals)
-            yield idiom
+        if any(t in i.text.lower() for t in bad_lefg_texts):
+            logging.info('Skipping %s', i.text)
+            continue
+        yield replace_all(i.text.strip(), values=bad_vals)
 
 
 def get_all_idioms():
