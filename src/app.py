@@ -1,3 +1,4 @@
+import os
 from flask import Flask, jsonify, request, render_template
 import flask_ask as fa
 from functools import lru_cache
@@ -68,6 +69,7 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 app = Flask(__name__)
+app.config['ASK_APPLICATION_ID'] = os.getenv('ASK_APPLICATION_ID', None)
 ask = fa.Ask(app, '/alexa')
 
 logger.info('Loading phoneme data')
