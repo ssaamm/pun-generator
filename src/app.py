@@ -1,5 +1,4 @@
 from flask import Flask, jsonify, request, render_template
-from itertools import islice
 from functools import lru_cache
 import logging
 
@@ -55,6 +54,8 @@ def lev_dist(s, t):
 
 def replace_word(sentence, ndx, replacement):
     split = sentence.split()
+    if split[ndx].lower() == replacement.lower():
+        return None
     split[ndx] = replacement
     return ' '.join(split)
 
@@ -86,7 +87,7 @@ def index():
 @app.route('/pun')
 def pun():
     input_string = request.args.get('s')
-    puns = get_puns(input_string)
+    puns = get_puns(input_string.strip())
     return jsonify({'puns': puns})
 
 
@@ -106,7 +107,8 @@ def get_puns(input_string, limit=10):
                              for ndx, word_phoneme in enumerate(word_phonemes)
                              if word_phoneme is not None)
 
-    return [pun for score, pun in islice(sorted(scored_idioms, key=lambda t: t[0]), limit)]
+    scored_idioms.sort(key=lambda score_pun: score_pun[0])
+    return [pun for score, pun in scored_idioms if pun is not None][:limit]
 
 if __name__ == '__main__':
     app.run(debug=True)
