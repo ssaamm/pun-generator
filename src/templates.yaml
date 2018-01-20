@@ -1,3 +1,6 @@
 welcome: Hi there, what word do you want a pun for?
 pun_found: Here's a few puns for {{ word }}. {{ puns|join(', ') }}
 sorry: Sorry, I can't find a pun for {{ word }}
+help: Pun Finder can come up with puns on any word. What word would you like a pun for?
+re_prompt: I didn't hear that. What word would you like a pun for?
+stop: See you later alligator!

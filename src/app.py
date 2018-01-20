@@ -124,11 +124,25 @@ def new_pun():
 @ask.intent('PunIntent')
 def get_pun(word):
     puns = get_puns(word, limit=3)
-    try:
+    if puns:
         return fa.statement(render_template('pun_found', puns=puns, word=word))
-    except IndexError:
-        return fa.statement(render_template('sorry', word=word))
+    return fa.statement(render_template('sorry', word=word))
 
+
+@ask.intent('AMAZON.HelpIntent')
+def get_help():
+    return fa.question(render_template('help'))
+
+
+@ask.intent('AMAZON.CancelIntent')
+@ask.intent('AMAZON.StopIntent')
+def stop():
+    return fa.statement(render_template('stop'))
+
+
+@ask.intent('AMAZON.NoIntent')
+def re_prompt():
+    return fa.question(render_template('re_prompt'))
 
 if __name__ == '__main__':
     app.run(debug=True)
