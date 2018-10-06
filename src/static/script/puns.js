@@ -50,22 +50,24 @@ function onGetPunsClicked(event) {
     }
 
     get('pun?s=' + value, function(data) {
-        writePuns(data.puns);
+        writePuns(data.puns, value);
         unsetIsPunsLoading();
     }, function() {
         unsetIsPunsLoading();
     });
 }
 
-function writePuns(puns) {
+function writePuns(puns, word) {
     var list = document.getElementById('puns-list');
     list.innerHTML = '';
 
-    if (puns.length == 0) {
+    if (puns.length === 0) {
         puns = ['No puns found :('];
     }
 
     for (var i = 0; i < puns.length; ++i) {
         list.appendChild(createElement('li', puns[i]));
     }
+
+    window.history.replaceState(null, word + ' Puns - Pun Finder', '/?word=' + word);
 }
