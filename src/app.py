@@ -4,10 +4,13 @@ import flask_ask as fa
 from functools import lru_cache
 import logging
 
+base = os.path.dirname(__file__)
+
+
 def get_pronounciations() -> dict:
     pronounciations = {}
 
-    with open('data/cmudict', 'r', encoding='latin-1') as f:
+    with open(os.path.join(base, 'data/cmudict'), 'r', encoding='latin-1') as f:
         for line in f:
             if line.startswith(';;;'):
                 continue
@@ -76,7 +79,7 @@ logger.info('Loading phoneme data')
 pronounciations = get_pronounciations()
 
 logger.info('Loading idioms data')
-with open('data/idioms', 'r') as f:
+with open(os.path.join(base, 'data/idioms'), 'r') as f:
     idioms = [L.strip() for L in f]
 
 
