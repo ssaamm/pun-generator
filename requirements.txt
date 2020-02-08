@@ -1,4 +1,4 @@
 flask
 requests
 beautifulsoup4
-Flask-Ask==0.9.7
+Flask-Ask
