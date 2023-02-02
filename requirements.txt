@@ -1,4 +1,4 @@
 requests==2.18.4
 beautifulsoup4==4.6.0
 Flask-Ask==0.9.8
-Werkzeug==0.14.1
+Werkzeug==0.15.5
