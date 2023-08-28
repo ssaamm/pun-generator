@@ -83,8 +83,6 @@ with open('data/idioms', 'r') as f:
 @app.route('/')
 def index():
     puns, word = None, None
-    if 'stats' in request.args:
-        logger.info(get_puns.cache_info())
     if 'word' in request.args:
         word = request.args.get('word').strip()
         if len(word) < 1:
